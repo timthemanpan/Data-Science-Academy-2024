@@ -355,8 +355,6 @@ VALUES
     (8, 1, 'Alice Smith', '123 Main St', 2, 'Burger Barn', '2021-02-10', 'Rider H', '19:00:00', 'Zone 1'),
     (9, 1, 'Alice Smith', '123 Main St', 3, 'Sushi Central', '2021-03-01', 'Rider I', '20:00:00', 'Zone 1'),
     (10, 1, 'Alice Smith', '123 Main St', 3, 'Sushi Central', '2021-03-05', 'Rider J', '21:00:00', 'Zone 1'),
-
-    -- Orders for Bob Johnson (Customer ID: 2)
     (11, 2, 'Bob Johnson', '456 Oak Ave', 2, 'Burger Barn', '2021-01-02', 'Rider K', '12:30:00', 'Zone 2'),
     (12, 2, 'Bob Johnson', '456 Oak Ave', 2, 'Burger Barn', '2021-01-06', 'Rider L', '13:30:00', 'Zone 2'),
     (13, 2, 'Bob Johnson', '456 Oak Ave', 2, 'Burger Barn', '2021-01-11', 'Rider M', '14:30:00', 'Zone 2'),
@@ -366,8 +364,6 @@ VALUES
     (17, 2, 'Bob Johnson', '456 Oak Ave', 3, 'Sushi Central', '2021-02-11', 'Rider Q', '18:30:00', 'Zone 2'),
     (18, 2, 'Bob Johnson', '456 Oak Ave', 4, 'Taco Town', '2021-03-02', 'Rider R', '19:30:00', 'Zone 2'),
     (19, 2, 'Bob Johnson', '456 Oak Ave', 4, 'Taco Town', '2021-03-06', 'Rider S', '20:30:00', 'Zone 2'),
-
-    -- Orders for Carol Williams (Customer ID: 3)
     (20, 3, 'Carol Williams', '789 Pine Rd', 1, 'Pizza Palace', '2021-01-03', 'Rider T', '12:15:00', 'Zone 3'),
     (21, 3, 'Carol Williams', '789 Pine Rd', 1, 'Pizza Palace', '2021-01-07', 'Rider U', '13:15:00', 'Zone 3'),
     (22, 3, 'Carol Williams', '789 Pine Rd', 1, 'Pizza Palace', '2021-01-12', 'Rider V', '14:15:00', 'Zone 3'),
@@ -386,4 +382,30 @@ SELECT *
 FROM myownschema.orders;
 
 -- Answer:
-	
+
+-- Write a query or script to identify the top three favourite stores for each customer based on the number of orders.
+WITH alice_table AS(
+SELECT COUNT(*),store_name
+FROM myownschema.orders
+WHERE customer_name = 'Alice Smith'
+GROUP BY store_name
+)
+SELECT * 
+FROM alice_table;
+
+WITH bob_table AS(
+SELECT COUNT(*),store_name,customer_name
+FROM myownschema.orders
+WHERE customer_name = 'Bob Johnson'
+GROUP BY store_name
+)
+SELECT * FROM bob_table;
+
+SELECT COUNT(*),store_name
+FROM myownschema.orders
+WHERE customer_name = 'Carol Williams'
+GROUP BY store_name;
+
+SELECT * FROM 
+
+

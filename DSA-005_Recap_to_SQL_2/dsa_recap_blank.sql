@@ -3,8 +3,14 @@
 -- Refresher on how to perform basic query and how the database works:
 -- SELECT Clause: everything = *
 -- Select department table, the employee table and vendor table. Let's explore the database a little!
+SELECT * 
+FROM humanresources.department;
 
+SELECT * 
+FROM humanresources.employee;
 
+SELECT *
+FROM purchasing.vendor; 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -12,7 +18,8 @@
 
 -- Select only name, start time and end time.
 -- humanresources.shift;
-
+SELECT name,starttime,endtime
+FROM humanresources.shift;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -20,14 +27,20 @@
 
 -- Distinct group names from department and businessentityid from jobcandidate
 
+SELECT DISTINCT(groupname)
+FROM humanresources.department;
 
+SELECT DISTINCT(businessentityid)
+FROM humanresources.jobcandidate;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- LIMIT: As the name suggest it limits the number of *rows* shown at the end result
 
 -- Limit the table productvendor to 10 rows, purchasing.productvendor
-
+SELECT * 
+FROM purchasing.productvendor
+LIMIT 10;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,8 +48,12 @@
 
 -- From the customer table Multiplcation/division/addition/subtraction the store_id
 
-SELECT
-
+SELECT 
+	customerid
+	,storeid*10 AS Multiplication
+	,storeid+10 AS Addition
+	,storeid/10 AS Division
+	,storeid-10 AS Minus
 FROM sales.customer
 LIMIT 10;
 
@@ -44,28 +61,27 @@ LIMIT 10;
 
 --Q1: SELECT the DISTINCT title, last name, middlename and first_name of each person from the person schema. Return only 231 rows.
 --A1;
-
-
+SELECT DISTINCT title, lastname,middlename,firstname
+FROM person.person
+LIMIT 231;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- WHERE clause: = 
-
--- humanresources.employee
-
-
 -- When dealing with NULL values
 -- purchasing.productvendor
-
+SELECT * 
+FROM purchasing.productvendor
+WHERE  onorderqty IS NOT NULL;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- WHERE clause: Arithmetic filter
 
 -- From customer table, territoryid = 4
-SELECT DISTINCT territoryid
+SELECT territoryid
 FROM sales.customer
-WHERE 
+WHERE territoryid=4
 LIMIT 100;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,7 +91,7 @@ LIMIT 100;
 -- From employee table, select either Design Engineer or Tool Designer
 SELECT *
 FROM humanresources.employee
-
+WHERE jobtitle='Design Engineer' OR jobtitle='Tool Designer';
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -84,6 +100,7 @@ FROM humanresources.employee
 -- From employee, gender must be Male and maritalstatus must be single
 SELECT * 
 FROM humanresources.employee
+WHERE (gender='M' AND maritalstatus='S')
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,6 +115,7 @@ SELECT
 	vacationhours,
 	sickleavehours
 FROM humanresources.employee
+WHERE (maritalstatus='S' AND gender='M') OR (maritalstatus='M' AND gender='F');
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -107,10 +125,11 @@ FROM humanresources.employee
 
 SELECT *
 FROM sales.salesperson
-
+WHERE (salesperson.territoryid=4 OR salesperson.territoryid=6) 
+AND (salesperson.salesquota =250000 OR salesperson.salesquota =300000);
 	
 SELECT *
-FROM sales.salesperson
+FROM sales.salesperson;
 
 
 --Note: AND takes higher priority than OR
@@ -122,6 +141,12 @@ FROM sales.salesperson
 
 --WHERE clause: IN clause
 --Q: Find all the employees whose birthdate fall on these dates. humanresources.employee
+SELECT *
+FROM humanresources.employee
+WHERE birthdate IN ('1977-06-06','1984-04-30','1985-05-04');
+
+SELECT *
+FROM humanresources.employee;
 
 -- '1977-06-06'
 -- '1984-04-30'
@@ -138,12 +163,14 @@ FROM sales.salesperson
 
 SELECT *
 FROM person.person
+WHERE firstname LIKE 'J%';
 
 
 -- But what if you know the number of letters in the firstname?
 
 SELECT *
 FROM person.person
+WHERE firstname LIKE 'J____';
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +179,7 @@ FROM person.person
 
 SELECT *
 FROM person.person
+WHERE LOWER(firstname) LIKE '%a%'
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,12 +190,13 @@ FROM person.person
 
 SELECT *
 FROM person.person
-
+WHERE LOWER(lastname) NOT LIKE '%a%';
 
 -- From the employee table, choose middle name that contain
 
 SELECT *
 FROM humanresources.employee
+WHERE middlename LIKE '';
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -176,6 +205,12 @@ FROM humanresources.employee
 -- For us to use when we want to use aggregates.
 
 -- From employee table, group by gender, humanresources.employee
+SELECT gender,maritalstatus,jobtitle
+FROM humanresources.employee
+GROUP BY 1,2,3;
+
+SELECT *
+FROM humanresources.employee;
 
 
 -- We can also group more than one column
@@ -185,13 +220,20 @@ FROM humanresources.employee
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- All the AGGREGATES!
+SELECT gender, COUNT(gender) AS headcount
+FROM humanresources.employee
+GROUP BY gender;
 
-SELECT
+
+SELECT *
 FROM humanresources.employee
 
 
 -- Q2: Analyse if the marital status of each gender affects the number of vacation hours one will take
 -- A2:
+SELECT maritalstatus,gender,AVG(vacationhours) AS average_vaca_hours,MAX(vacationhours),MIN(vacationhours),SUM(vacationhours)
+FROM humanresources.employee
+GROUP BY gender,maritalstatus;
 
 
 
@@ -199,11 +241,21 @@ FROM humanresources.employee
 
 SELECT *
 FROM humanresources.employee
--- hiredate earliest
+ORDER BY hiredate DESC;
 
+-- hiredate earliest
 SELECT *
 FROM humanresources.employee
+ORDER BY hiredate ASC
+LIMIT 1;
+
+SELECT *
+FROM humanresources.employee;
 -- hiredate latest
+SELECT *
+FROM humanresources.employee
+ORDER BY hiredate DESC
+LIMIT 1;
 
 -- Sort table using two or more values
 
@@ -213,14 +265,25 @@ FROM humanresources.employee
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- HAVING clause:
-SELECT
+SELECT 
+	jobtitle,
+	AVG(sickleavehours) AS sickleavehours
 FROM humanresources.employee
+GROUP BY jobtitle
+HAVING AVG(sickleavehours)>50;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Q3: From the customer table, where customer has a personid and a storeid, find the territory that has higher than 40 customers
 -- A3:
 
+
+SELECT COUNT(territoryid),territoryid
+FROM sales.customer
+WHERE personid IS NOT NULL AND storeid IS NOT NULL
+GROUP BY territoryid
+HAVING COUNT(territoryid)>40
+ORDER BY COUNT(territoryid) ASC;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -229,6 +292,8 @@ SELECT
 	jobtitle,
 	birthdate
 FROM humanresources.employee
+ORDER BY birthdate ASC
+OFFSET 10;
 
 
 -- Q4: Another common whiteboard question, from the salesperson table, where customer has a personid and a storeid, find the territory that has higher than 40 customers
@@ -243,7 +308,12 @@ FROM humanresources.employee
 	2) Much faster using this compared to generating the entire multi-million row table
 	3) So people don't think you are a noob
 */
+-- THis is checking for a few values rather than running the query on the whole table that can take up memory and computing
 
+SELECT *
+FROM humanresources.employee
+WHERE gender='M'
+LIMIT 10;
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -261,6 +331,13 @@ FROM production.productsubcategory;
 SELECT *
 FROM production.productcategory;
 
+SELECT prod.productid, prod.name AS productname, prodcat.name AS catname,prodsubcat.name as subcatname
+FROM production.product as prod
+INNER JOIN production.productsubcategory as prodsubcat
+	on prodsubcat.productsubcategoryid = prod.productsubcategoryid
+INNER JOIN production.productcategory AS prodcat
+	ON prodcat.productcategoryid=prodsubcat.productcategoryid
+ORDER BY 3,4,2;
 
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -303,6 +380,9 @@ FROM humanresources.department;
 -- Let's find all the employee, their respecitve departments and the time they served there. Bonus if you can find out the duration in days each employee spent
 -- in each department! Duration in days cannot be NULL.
 
+SELECT
+FROM
+
 
 				
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -310,10 +390,6 @@ FROM humanresources.department;
 
 -- Q5: List all employees and their associated email addresses,  
 -- display their full name and email address.
-
-SELECT 
-
-FROM humanresources.employee AS employee
 
 
 -- Q6: Can LEFT JOIN cause duplication? How?
