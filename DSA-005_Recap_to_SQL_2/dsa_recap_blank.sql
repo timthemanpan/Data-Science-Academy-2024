@@ -321,7 +321,6 @@ LIMIT 10;
 -- JOINS: INNER 1
 
 -- Inner join to get product information along with its subcategory name and category name
-
 SELECT *
 FROM production.product;
 
@@ -331,14 +330,13 @@ FROM production.productsubcategory;
 SELECT *
 FROM production.productcategory;
 
-SELECT prod.productid, prod.name AS productname, prodcat.name AS catname,prodsubcat.name as subcatname
-FROM production.product as prod
-INNER JOIN production.productsubcategory as prodsubcat
-	on prodsubcat.productsubcategoryid = prod.productsubcategoryid
-INNER JOIN production.productcategory AS prodcat
-	ON prodcat.productcategoryid=prodsubcat.productcategoryid
-ORDER BY 3,4,2;
-
+SELECT product.productid,product.name as product_name,productsubcat.name AS subcategory,productcat.name as category
+FROM production.product as product
+INNER JOIN production.productsubcategory as productsubcat
+	ON product.productsubcategoryid=productsubcat.productsubcategoryid
+INNER JOIN production.productcategory as productcat
+	ON productsubcat.productcategoryid=productcat.productcategoryid
+ORDER BY 4,3,2;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -352,9 +350,10 @@ ORDER BY 3,4,2;
 SELECT *
 FROM humanresources.employee;
 
--- Is it unique?
-
--- Unique table!
+-- Check if employee table is unique
+SELECT CASE WHEN COUNT (DISTINCT businessentityid)=count(businessentityid)
+THEN 'Column values are unique' ELSE 'column values are not unique' END
+FROM humanresources.employee;
 -----------------------------
 
 -- Employee Department History table
@@ -362,9 +361,9 @@ FROM humanresources.employee;
 SELECT *
 FROM humanresources.employeedepartmenthistory;
 
--- Is it unique?
-
--- Not Unique table!
+SELECT CASE WHEN COUNT (DISTINCT businessentityid)=count(businessentityid)
+THEN 'Column values are unique' ELSE 'column values are not unique' END
+FROM humanresources.employeedepartmenthistory;
 -----------------------------
 
 -- Department table----------
@@ -372,25 +371,31 @@ FROM humanresources.employeedepartmenthistory;
 SELECT *
 FROM humanresources.department;
 
--- No unique form one!
-
--- Unique table!
+SELECT CASE WHEN COUNT (DISTINCT departmentid)=count(departmentid)
+THEN 'Column values are unique' ELSE 'column values are not unique' END
+FROM humanresources.department;
 -----------------------------
 
 -- Let's find all the employee, their respecitve departments and the time they served there. Bonus if you can find out the duration in days each employee spent
 -- in each department! Duration in days cannot be NULL.
-
-SELECT
-FROM
-
-
-				
+SELECT empdepartmenthistory.businessentityid,empdepartmenthistory.departmentid,department.name,groupname,startdate,enddate,loginid,jobtitle,birthdate,(enddate-startdate) as days_served_in_dept
+FROM humanresources.employeedepartmenthistory as empdepartmenthistory
+LEFT JOIN humanresources.employee as employee
+	ON empdepartmenthistory.businessentityid = employee.businessentityid
+LEFT JOIN humanresources.department as department
+	ON empdepartmenthistory.departmentid=department.departmentid
+WHERE (enddate-startdate) IS NOT NULL;				
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- JOINS: LEFT
 
 -- Q5: List all employees and their associated email addresses,  
 -- display their full name and email address.
-
+SELECT employee.businessentityid,CONCAT(firstname,' ',middlename,' ',lastname) AS fullname,emailaddress
+FROM humanresources.employee as employee
+LEFT JOIN person.person as person
+	ON employee.businessentityid=person.businessentityid
+LEFT JOIN person.emailaddress as email
+	ON employee.businessentityid = email.businessentityid;
 
 -- Q6: Can LEFT JOIN cause duplication? How?
 -- A6: It depends on the relationship that both tables share, if it is one to one unlikely and if one to many there could be
@@ -403,10 +408,15 @@ FROM
 -- include the sales order in the result.
 
 SELECT 
-    salesorderheader.salesorderid AS salesorderid, 
-    salesorderheader.orderdate AS orderdate, 
+	sales.salesorderid AS salesorderid, 
+    sales.orderdate AS orderdate, 
     customer.customerid AS customerid, 
     customer.personid AS personid
+FROM sales.customer as customer
+RIGHT JOIN sales.salesorderheader as sales
+	ON sales.customerid=customer.customerid
+WHERE customer.customerid IS NULL;
+ORDER BY salesorderid ASC;
 
 
 
@@ -439,6 +449,9 @@ SELECT
 	name
 FROM production.productmodel;
 
+SELECT production.productcategory.name AS catname,production.productmodel.name AS prodname
+FROM production.productcategory
+CROSS JOIN production.productmodel;
 
 
 -- Each category name is matched to each model name
@@ -455,6 +468,11 @@ FROM production.productmodel;
 
 -- Write a query to retrieve all sales orders and purchase orders, displaying the order ID and order date. 
 -- Use UNION ALL to combine the sales and purchase order data, keeping all duplicates.
+SELECT purchaseorderid,orderdate
+FROM purchasing.purchaseorderheader
+UNION ALL
+SELECT salesorderid,orderdate
+FROM sales.salesorderheader;
 
 
 
@@ -474,7 +492,6 @@ FROM sales.salesorderheader;
 -- DATETIME manipulations
 
 SELECT
-
 
 	CURRENT_DATE + INTERVAL '10 days' AS add_days,
 
